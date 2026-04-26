@@ -574,7 +574,8 @@ function showKiwifyModal() {
     document.getElementById('kiwifySupportEmail').value = '';
     document.getElementById('kiwifyProducerName').value = '';
     document.getElementById('kiwifyLanguage').value = 'pt-BR';
-    document.getElementById('kiwifyPaymentType').value = 'one_time';
+    document.getElementById('kiwifyPaymentType').value = 'pix';
+    document.getElementById('kiwifyProductType').value = 'digital';
     document.getElementById('kiwifyDeliveryType').value = 'kiwify';
     document.getElementById('kiwifyMembershipArea').value = 'Nova área de membros';
     document.getElementById('kiwifyProductModal').classList.add('show');
@@ -586,7 +587,8 @@ function fecharKiwifyModal() {
 
 async function submitKiwifyForm() {
     const pageUrl = document.getElementById('kiwifyPageUrl').value.trim();
-    const paymentType = document.getElementById('kiwifyPaymentType').value;
+    const paymentType = 'pix';
+    const productType = 'digital';
     const deliveryType = document.getElementById('kiwifyDeliveryType').value;
     const membershipArea = document.getElementById('kiwifyMembershipArea').value.trim() || 'Nova área de membros';
     const category = document.getElementById('kiwifyProductCategory').value;
@@ -614,6 +616,7 @@ async function submitKiwifyForm() {
 
     const kiwifyOptions = {
         paymentType,
+        productType,
         deliveryType,
         membershipArea,
         pageUrl,
