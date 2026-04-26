@@ -151,6 +151,20 @@
                     <textarea id="kiwifyProductDescription" class="input-field" rows="4" disabled></textarea>
                 </div>
                 <div class="form-row">
+                    <label for="kiwifyProductCategory">Categoria</label>
+                    <select id="kiwifyProductCategory" class="input-field">
+                        <option value="Internet Marketing">Internet Marketing</option>
+                        <option value="Negócios Digitais">Negócios Digitais</option>
+                        <option value="Marketing Digital">Marketing Digital</option>
+                        <option value="Desenvolvimento Pessoal">Desenvolvimento Pessoal</option>
+                        <option value="Empreendedorismo">Empreendedorismo</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="kiwifyImageUrl">URL da imagem do produto</label>
+                    <input id="kiwifyImageUrl" type="text" class="input-field" placeholder="https://example.com/imagem.png">
+                </div>
+                <div class="form-row">
                     <label for="kiwifyProductPrice">Preço</label>
                     <input id="kiwifyProductPrice" type="text" class="input-field" disabled>
                 </div>
@@ -159,19 +173,34 @@
                     <input id="kiwifyPageUrl" type="text" class="input-field" placeholder="https://example.com">
                 </div>
                 <div class="form-row">
+                    <label for="kiwifySupportEmail">E-mail de suporte</label>
+                    <input id="kiwifySupportEmail" type="email" class="input-field" placeholder="suporte@exemplo.com">
+                </div>
+                <div class="form-row">
+                    <label for="kiwifyProducerName">Nome de exibição do produtor</label>
+                    <input id="kiwifyProducerName" type="text" class="input-field" placeholder="João da Silva">
+                </div>
+                <div class="form-row">
+                    <label for="kiwifyLanguage">Idioma dos emails</label>
+                    <select id="kiwifyLanguage" class="input-field">
+                        <option value="pt-BR">Português</option>
+                        <option value="en-US">Inglês</option>
+                    </select>
+                </div>
+                <div class="form-row">
                     <label for="kiwifyPaymentType">Tipo de pagamento</label>
                     <select id="kiwifyPaymentType" class="input-field">
-                        <option value="único">Pagamento único</option>
-                        <option value="recorrente">Assinatura recorrente</option>
+                        <option value="one_time">Pagamento único</option>
+                        <option value="recurring">Assinatura recorrente</option>
                     </select>
                 </div>
                 <div class="form-row">
                     <label for="kiwifyDeliveryType">Entrega do conteúdo</label>
                     <select id="kiwifyDeliveryType" class="input-field">
                         <option value="kiwify">Área de membros da Kiwify</option>
-                        <option value="externa">Área de membros externa</option>
-                        <option value="presencial">Evento presencial</option>
-                        <option value="apenas_pagamento">Quero apenas receber pagamentos</option>
+                        <option value="external">Área de membros externa</option>
+                        <option value="event">Evento presencial</option>
+                        <option value="payment_only">Quero apenas receber pagamentos</option>
                     </select>
                 </div>
                 <div class="form-row">

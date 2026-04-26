@@ -71,7 +71,7 @@ async function criarProdutoKiwify(produto, apiKey, options = {}) {
     // Converter preço para centavos
     const precoEmCentavos = Math.round(Number(String(produto.preco).replace(',', '.')) * 100);
     const pageUrl = options.pageUrl || 'https://exemplo.com/vendas';
-    const paymentType = options.paymentType || 'único';
+    const paymentType = options.paymentType || 'one_time';
     const deliveryType = options.deliveryType || 'kiwify';
     const membershipArea = options.membershipArea || 'Nova área de membros';
 
@@ -81,12 +81,18 @@ async function criarProdutoKiwify(produto, apiKey, options = {}) {
         description: produto.descricao,
         price: precoEmCentavos,
         currency: 'BRL',
-        category: 'Internet Marketing',
+        category: options.category || 'Internet Marketing',
         page_url: pageUrl,
         payment_type: paymentType,
         delivery_type: deliveryType,
-        membership_area: membershipArea
+        membership_area: membershipArea,
+        support_email: options.supportEmail || '',
+        producer_name: options.producerName || '',
+        language: options.language || 'pt-BR'
     };
+    if (options.imageUrl) {
+        kiwifyPayload.image_url = options.imageUrl;
+    }
 
     console.log('Kiwify payload:', kiwifyPayload);
     console.log('Kiwify API key presente:', !!apiKey);

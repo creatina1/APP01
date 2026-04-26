@@ -552,7 +552,8 @@ async function enviarAnuncio(produto, contas, kiwifyOptions) {
         }
     } catch (error) {
         console.error('Erro de anúncio:', error);
-        mostrarNotificacao('❌ Falha ao anunciar produto. Veja o console para mais detalhes.', true);
+        const mensagem = formatErrorMessage(error.message || error);
+        mostrarNotificacao(`❌ ${mensagem}`, true);
     }
 }
 
@@ -566,9 +567,14 @@ function showKiwifyModal() {
     if (!anuncioKiwifyProduto) return;
     document.getElementById('kiwifyProductName').value = anuncioKiwifyProduto.nome;
     document.getElementById('kiwifyProductDescription').value = anuncioKiwifyProduto.descricao || '';
+    document.getElementById('kiwifyProductCategory').value = 'Internet Marketing';
+    document.getElementById('kiwifyImageUrl').value = '';
     document.getElementById('kiwifyProductPrice').value = `R$ ${anuncioKiwifyProduto.preco}`;
     document.getElementById('kiwifyPageUrl').value = 'https://exemplo.com';
-    document.getElementById('kiwifyPaymentType').value = 'único';
+    document.getElementById('kiwifySupportEmail').value = '';
+    document.getElementById('kiwifyProducerName').value = '';
+    document.getElementById('kiwifyLanguage').value = 'pt-BR';
+    document.getElementById('kiwifyPaymentType').value = 'one_time';
     document.getElementById('kiwifyDeliveryType').value = 'kiwify';
     document.getElementById('kiwifyMembershipArea').value = 'Nova área de membros';
     document.getElementById('kiwifyProductModal').classList.add('show');
@@ -583,9 +589,24 @@ async function submitKiwifyForm() {
     const paymentType = document.getElementById('kiwifyPaymentType').value;
     const deliveryType = document.getElementById('kiwifyDeliveryType').value;
     const membershipArea = document.getElementById('kiwifyMembershipArea').value.trim() || 'Nova área de membros';
+    const category = document.getElementById('kiwifyProductCategory').value;
+    const imageUrl = document.getElementById('kiwifyImageUrl').value.trim();
+    const supportEmail = document.getElementById('kiwifySupportEmail').value.trim();
+    const producerName = document.getElementById('kiwifyProducerName').value.trim();
+    const language = document.getElementById('kiwifyLanguage').value;
 
     if (!pageUrl) {
         mostrarNotificacao('⚠️ Preencha a página de vendas', true);
+        return;
+    }
+
+    if (!supportEmail) {
+        mostrarNotificacao('⚠️ Preencha o e-mail de suporte', true);
+        return;
+    }
+
+    if (!producerName) {
+        mostrarNotificacao('⚠️ Preencha o nome do produtor', true);
         return;
     }
 
@@ -595,7 +616,12 @@ async function submitKiwifyForm() {
         paymentType,
         deliveryType,
         membershipArea,
-        pageUrl
+        pageUrl,
+        category,
+        imageUrl,
+        supportEmail,
+        producerName,
+        language
     };
 
     await enviarAnuncio(anuncioKiwifyProduto, anuncioKiwifyContas, kiwifyOptions);
