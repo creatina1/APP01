@@ -60,17 +60,13 @@ app.get('/health', (req, res) => {
 });
 
 async function criarProdutoKiwify(produto, apiKey) {
+    // Converter preço para centavos
+    const precoEmCentavos = Math.round(Number(produto.preco.replace(',', '.')) * 100);
+
     const kiwifyPayload = {
         name: produto.nome,
-        title: produto.nome,
-        description: produto.descricao,
-        price: Number(produto.preco),
-        currency: 'BRL',
-        access_key: produto.accessKey || '',
-        metadata: {
-            createdBy: 'Gestão de Infoprodutos',
-            source: 'APP01'
-        }
+        price: precoEmCentavos,
+        category: 'Internet Marketing'
     };
 
     console.log('Kiwify payload:', kiwifyPayload);

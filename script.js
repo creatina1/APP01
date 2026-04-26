@@ -526,10 +526,16 @@ async function anunciarProduto(id) {
         localStorage.setItem('postagens', JSON.stringify(postagens));
         atualizarContasStatus();
 
-        if (plataformasFalha.length > 0) {
-            mostrarNotificacao(`⚠️ Algumas integrações falharam: ${plataformasFalha.join(' | ')}`, true);
-        } else {
-            mostrarNotificacao(`✅ Produto anunciado em: ${plataformasSucesso.join(', ')}`);
+        // Verificar especificamente Kiwify
+        const kiwifyResult = result.results.find(r => r.plataforma === 'Kiwify');
+        if (kiwifyResult && kiwifyResult.success) {
+            alert('Produto Anunciado com Sucesso!');
+        } else if (kiwifyResult) {
+            console.error('Erro ao anunciar produto na Kiwify:', kiwifyResult.error);
+        }
+
+        if (plataformasFalha.length > 0 && plataformasFalha.some(f => !f.startsWith('Kiwify:'))) {
+            mostrarNotificacao(`⚠️ Algumas integrações falharam: ${plataformasFalha.filter(f => !f.startsWith('Kiwify:')).join(' | ')}`, true);
         }
     } catch (error) {
         mostrarNotificacao(`❌ ${error.message}`, true);
