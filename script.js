@@ -498,13 +498,12 @@ async function anunciarProduto(id) {
 
         const result = await response.json();
         if (!response.ok) {
-            const detail = result.message || result.error || extractErrorFromResults(result.results) || 'Erro ao anunciar produto';
             console.error('Erro ao anunciar produto:', result);
-            throw new Error(detail);
+            throw new Error('Falha ao anunciar produto');
         }
 
         const plataformasSucesso = result.results.filter(r => r.success).map(r => r.plataforma);
-        const plataformasFalha = result.results.filter(r => !r.success).map(r => `${r.plataforma}: ${r.error || 'erro desconhecido'}`);
+        const plataformasFalha = result.results.filter(r => !r.success).map(r => `${r.plataforma}: ${formatErrorMessage(r.error || 'erro desconhecido')}`);
 
         const postagens = JSON.parse(localStorage.getItem('postagens')) || [];
         const dataCriacao = new Date().toLocaleString('pt-BR');
@@ -532,7 +531,7 @@ async function anunciarProduto(id) {
             alert('Produto Anunciado com Sucesso!');
         } else if (kiwifyResult) {
             console.error('Erro ao anunciar produto na Kiwify:', kiwifyResult.error);
-            mostrarNotificacao('❌ Falha ao anunciar na Kiwify', true);
+            mostrarNotificacao('❌ Não foi possível anunciar na Kiwify', true);
         }
 
         if (plataformasFalha.length > 0 && plataformasFalha.some(f => !f.startsWith('Kiwify:'))) {
@@ -540,7 +539,7 @@ async function anunciarProduto(id) {
         }
     } catch (error) {
         console.error('Erro de anúncio:', error);
-        mostrarNotificacao(`❌ ${formatErrorMessage(error.message || error)}`, true);
+        mostrarNotificacao('❌ Falha ao anunciar produto. Veja o console para mais detalhes.', true);
     }
 }
 
@@ -978,17 +977,41 @@ function extractErrorFromResults(results) {
 }
 
 function formatErrorMessage(error) {
-    if (!error) return 'Erro ao anunciar produto';
+    if (!error) return 'Falha ao anunciar produto';
     if (typeof error === 'string') {
+        const traduzido = traduzirMensagemErro(error);
+        if (traduzido) return traduzido;
         const max = 100;
-        return error.length > max ? `${error.slice(0, max)}...` : error;
+        const texto = error.replace(/\{|\}|\[|\]/g, '');
+        return texto.length > max ? `${texto.slice(0, max)}...` : texto;
     }
     if (Array.isArray(error)) {
         return error.map(formatErrorMessage).join(' | ');
     }
     if (typeof error === 'object') {
         const values = Object.values(error).filter(Boolean);
-        return values.length ? formatErrorMessage(values.join(' | ')) : 'Erro ao anunciar produto';
+        return values.length ? formatErrorMessage(values.join(' | ')) : 'Falha ao anunciar produto';
     }
     return String(error);
+}
+
+function traduzirMensagemErro(texto) {
+    if (!texto || typeof texto !== 'string') return null;
+    const mensagem = texto.toUpperCase();
+    const mapa = {
+        'TOKEN_INVALID': 'Token inválido',
+        'INVALID_TOKEN': 'Token inválido',
+        'TOKEN_EXPIRED': 'Token expirado',
+        'API_KEY_INVALID': 'Chave de API inválida',
+        'API_KEY_REQUIRED': 'Chave de API obrigatória',
+        'INVALID_REQUEST': 'Requisição inválida',
+        'UNAUTHORIZED': 'Não autorizado',
+        'NOT_FOUND': 'Não encontrado',
+        'METHOD_NOT_ALLOWED': 'Método não permitido',
+        'ACCESS_DENIED': 'Acesso negado'
+    };
+    for (const chave in mapa) {
+        if (mensagem.includes(chave)) return mapa[chave];
+    }
+    return null;
 }
