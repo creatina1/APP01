@@ -130,7 +130,7 @@ function gerarProdutos() {
 
     for (let i = 0; i < 5; i++) {
         const idx = Math.floor(Math.random() * nomes.length);
-        const preco = (Math.random() * 95 + 5).toFixed(2);
+        const preco = gerarPrecoRedondo();
         const id = Date.now() + i;
 
         const produto = criarInfoprodutoDetalhado(id, nomes[idx], descricoes[idx], preco);
@@ -155,6 +155,12 @@ function gerarProdutos() {
         `;
         grid.appendChild(card);
     }
+}
+
+function gerarPrecoRedondo() {
+    const base = Math.floor(Math.random() * 87) + 10;
+    const cents = Math.random() < 0.5 ? 0.9 : 0.99;
+    return (base + cents).toFixed(2);
 }
 
 function criarInfoprodutoDetalhado(id, nome, descricao, preco) {

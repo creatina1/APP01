@@ -59,12 +59,17 @@ app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK', message: 'Servidor funcionando' });
 });
 
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 async function criarProdutoKiwify(produto, apiKey) {
     const kiwifyPayload = {
         name: produto.nome,
         title: produto.nome,
         description: produto.descricao,
         price: Number(produto.preco),
+        currency: 'BRL',
         access_key: produto.accessKey || '',
         metadata: {
             createdBy: 'Gestão de Infoprodutos',
