@@ -1,23 +1,11 @@
 const express = require('express');
 const path = require('path');
-const fetch = require('node-fetch');
 const app = express();
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname)));
+app.use(express.static('.'));
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'OK', message: 'Servidor funcionando' });
-});
-
-app.get('*', (req, res) => {
-    if (req.path.startsWith('/api')) {
-        return res.status(404).json({ success: false, message: 'Rota API não encontrada' });
-    }
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
@@ -65,6 +53,10 @@ app.post('/api/anunciar', async (req, res) => {
     const statusCode = sucesso ? 200 : 400;
 
     return res.status(statusCode).json({ success: sucesso, results: resultados });
+});
+
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'OK', message: 'Servidor funcionando' });
 });
 
 async function criarProdutoKiwify(produto, apiKey) {
