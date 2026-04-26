@@ -492,11 +492,12 @@ async function anunciarProduto(id) {
 
         const result = await response.json();
         if (!response.ok) {
-            throw new Error(result.message || 'Erro ao anunciar produto');
+            const detail = result.message || result.error || JSON.stringify(result);
+            throw new Error(detail || 'Erro ao anunciar produto');
         }
 
         const plataformasSucesso = result.results.filter(r => r.success).map(r => r.plataforma);
-        const plataformasFalha = result.results.filter(r => !r.success).map(r => `${r.plataforma}: ${r.error}`);
+        const plataformasFalha = result.results.filter(r => !r.success).map(r => `${r.plataforma}: ${r.error || 'erro desconhecido'}`);
 
         const postagens = JSON.parse(localStorage.getItem('postagens')) || [];
         const dataCriacao = new Date().toLocaleString('pt-BR');

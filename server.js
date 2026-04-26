@@ -12,6 +12,8 @@ app.get('/', (req, res) => {
 app.post('/api/anunciar', async (req, res) => {
     const { produto, contas } = req.body;
 
+    console.log('POST /api/anunciar body:', { produto, contas: { ...contas, kiwify: { apiKey: contas?.kiwify?.apiKey ? '*****' : '' } } });
+
     if (!produto || !contas) {
         return res.status(400).json({ success: false, message: 'Dados inválidos para anúncio' });
     }
@@ -92,7 +94,7 @@ async function criarProdutoKiwify(produto, apiKey) {
     return data;
 }
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📱 Acesse: http://localhost:${PORT}`);
