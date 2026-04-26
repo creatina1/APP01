@@ -56,31 +56,27 @@
                 <div class="header-section">
                     <h2>💳 Gestão de Contas</h2>
                 </div>
-                <p style="margin-bottom: 20px; color: #b0b0b0;">Coloque o email e a senha de cada plataforma para realizar o login e permitir que o produto seja anunciado automaticamente.</p>
+                <p style="margin-bottom: 20px; color: #b0b0b0;">Informe a API Key de cada plataforma. O produto será enviado automaticamente para as plataformas configuradas.</p>
                 <div class="contas-container">
                     <div class="conta-card">
                         <h3>Hotmart</h3>
-                        <input type="text" id="hotmartEmail" placeholder="Email da conta Hotmart" class="input-field">
-                        <input type="password" id="hotmartSenha" placeholder="Senha da conta Hotmart" class="input-field">
-                        <button onclick="salvarConta('hotmart')" class="btn-primary">Conectar Hotmart</button>
+                        <input type="text" id="hotmartApiKey" placeholder="API Key da Hotmart" class="input-field">
+                        <button onclick="salvarConta('hotmart')" class="btn-primary">Salvar Hotmart</button>
                     </div>
                     <div class="conta-card">
                         <h3>Kiwify</h3>
-                        <input type="text" id="kiwifyEmail" placeholder="Email da conta Kiwify" class="input-field">
-                        <input type="password" id="kiwifySenha" placeholder="Senha da conta Kiwify" class="input-field">
-                        <button onclick="salvarConta('kiwify')" class="btn-primary">Conectar Kiwify</button>
+                        <input type="text" id="kiwifyApiKey" placeholder="API Key da Kiwify" class="input-field">
+                        <button onclick="salvarConta('kiwify')" class="btn-primary">Salvar Kiwify</button>
                     </div>
                     <div class="conta-card">
                         <h3>Monetizze</h3>
-                        <input type="text" id="monetizzeEmail" placeholder="Email da conta Monetizze" class="input-field">
-                        <input type="password" id="monetizzeSenha" placeholder="Senha da conta Monetizze" class="input-field">
-                        <button onclick="salvarConta('monetizze')" class="btn-primary">Conectar Monetizze</button>
+                        <input type="text" id="monetizzeApiKey" placeholder="API Key da Monetizze" class="input-field">
+                        <button onclick="salvarConta('monetizze')" class="btn-primary">Salvar Monetizze</button>
                     </div>
                     <div class="conta-card">
                         <h3>Eduzz</h3>
-                        <input type="text" id="eduzzEmail" placeholder="Email da conta Eduzz" class="input-field">
-                        <input type="password" id="eduzzSenha" placeholder="Senha da conta Eduzz" class="input-field">
-                        <button onclick="salvarConta('eduzz')" class="btn-primary">Conectar Eduzz</button>
+                        <input type="text" id="eduzzApiKey" placeholder="API Key da Eduzz" class="input-field">
+                        <button onclick="salvarConta('eduzz')" class="btn-primary">Salvar Eduzz</button>
                     </div>
                 </div>
                 <div id="contasStatus" class="contas-status"></div>

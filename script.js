@@ -18,10 +18,10 @@ function iniciarDados() {
     }
 
     const contas = JSON.parse(localStorage.getItem('contas')) || {};
-    contas.hotmart = contas.hotmart || { conectado: false, email: '', senha: '' };
-    contas.kiwify = contas.kiwify || { conectado: false, email: '', senha: '' };
-    contas.monetizze = contas.monetizze || { conectado: false, email: '', senha: '' };
-    contas.eduzz = contas.eduzz || { conectado: false, email: '', senha: '' };
+    contas.hotmart = contas.hotmart || { conectado: false, apiKey: '' };
+    contas.kiwify = contas.kiwify || { conectado: false, apiKey: '' };
+    contas.monetizze = contas.monetizze || { conectado: false, apiKey: '' };
+    contas.eduzz = contas.eduzz || { conectado: false, apiKey: '' };
     localStorage.setItem('contas', JSON.stringify(contas));
 }
 
@@ -462,7 +462,7 @@ function gerarPdfBlob(produto) {
     return new Blob([pdf], { type: 'application/pdf' });
 }
 
-function anunciarProduto(id) {
+async function anunciarProduto(id) {
     const historico = JSON.parse(localStorage.getItem('historico')) || [];
     let produto = produtosGerados.find(p => p.id === id) || historico.find(p => p.id === id);
 
@@ -472,51 +472,67 @@ function anunciarProduto(id) {
     }
 
     const contas = JSON.parse(localStorage.getItem('contas')) || { hotmart: {}, kiwify: {}, monetizze: {}, eduzz: {} };
-    const conexoes = [];
+    const plataformasConfiguradas = Object.entries(contas).filter(([, conta]) => conta && conta.conectado && conta.apiKey);
 
-    if (contas.hotmart && contas.hotmart.conectado) {
-        conexoes.push('Hotmart');
-    }
-    if (contas.kiwify && contas.kiwify.conectado) {
-        conexoes.push('Kiwify');
-    }
-    if (contas.monetizze && contas.monetizze.conectado) {
-        conexoes.push('Monetizze');
-    }
-    if (contas.eduzz && contas.eduzz.conectado) {
-        conexoes.push('Eduzz');
-    }
-
-    if (conexoes.length === 0) {
+    if (plataformasConfiguradas.length === 0) {
         mostrarNotificacao('⚠️ Conecte pelo menos uma plataforma antes de anunciar', true);
         return;
     }
 
-    const plataforma = conexoes[0];
     if (!produto.accessKey) {
         produto.accessKey = generateAccessKey(produto.nome, produto.id);
     }
 
-    const postagens = JSON.parse(localStorage.getItem('postagens')) || [];
-    const dataCriacao = new Date().toLocaleString('pt-BR');
+    try {
+        const response = await fetch('/api/anunciar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ produto, contas })
+        });
 
-    const postagem = {
-        produtoId: produto.id,
-        nome: produto.nome,
-        descricao: produto.descricao,
-        preco: produto.preco,
-        plataforma,
-        conta: plataforma === 'Hotmart' ? contas.hotmart.email : plataforma === 'Kiwify' ? contas.kiwify.email : plataforma === 'Monetizze' ? contas.monetizze.email : contas.eduzz.email,
-        configuracao: plataforma === 'Kiwify' ? contas.kiwifyConfig : null,
-        data: dataCriacao,
-        accessKey: produto.accessKey,
-        digitalContent: produto.digitalContent || null
-    };
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.message || 'Erro ao anunciar produto');
+        }
 
-    postagens.push(postagem);
-    localStorage.setItem('postagens', JSON.stringify(postagens));
-    atualizarContasStatus();
-    mostrarNotificacao(`📢 Produto criado automaticamente em ${plataforma}`);
+        const plataformasSucesso = result.results.filter(r => r.success).map(r => r.plataforma);
+        const plataformasFalha = result.results.filter(r => !r.success).map(r => `${r.plataforma}: ${r.error}`);
+
+        const postagens = JSON.parse(localStorage.getItem('postagens')) || [];
+        const dataCriacao = new Date().toLocaleString('pt-BR');
+
+        const postagem = {
+            produtoId: produto.id,
+            nome: produto.nome,
+            descricao: produto.descricao,
+            preco: produto.preco,
+            plataforma: plataformasSucesso.join(', '),
+            conta: plataformasSucesso.length > 0 ? plataformasSucesso.join(', ') : 'Nenhuma',
+            configuracao: contas.kiwifyConfig || null,
+            data: dataCriacao,
+            accessKey: produto.accessKey,
+            digitalContent: produto.digitalContent || null,
+            resultados: result.results
+        };
+
+        postagens.push(postagem);
+        localStorage.setItem('postagens', JSON.stringify(postagens));
+        atualizarContasStatus();
+
+        if (plataformasFalha.length > 0) {
+            mostrarNotificacao(`⚠️ Algumas integrações falharam: ${plataformasFalha.join(' | ')}`, true);
+        } else {
+            mostrarNotificacao(`✅ Produto anunciado em: ${plataformasSucesso.join(', ')}`);
+        }
+    } catch (error) {
+        mostrarNotificacao(`❌ ${error.message}`, true);
+    }
+}
+
+function maskApiKey(apiKey) {
+    if (!apiKey) return '';
+    if (apiKey.length <= 10) return apiKey;
+    return `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}`;
 }
 
 function mostrarConteudoDigital(id) {
@@ -690,80 +706,36 @@ function limparHistorico() {
 }
 
 function salvarConta(plataforma) {
-    const contas = JSON.parse(localStorage.getItem('contas')) || { hotmart: {}, kiwify: {}, kiwifyConfig: {} };
+    const contas = JSON.parse(localStorage.getItem('contas')) || { hotmart: {}, kiwify: {}, monetizze: {}, eduzz: {} };
+    const apiKeyInput = document.getElementById(`${plataforma}ApiKey`);
+    const apiKey = apiKeyInput?.value.trim();
 
-    if (plataforma === 'hotmart') {
-        const email = document.getElementById('hotmartEmail').value.trim();
-        const senha = document.getElementById('hotmartSenha').value.trim();
-
-        if (!email || !senha) {
-            mostrarNotificacao('⚠️ Preencha email e senha da conta Hotmart', true);
-            return;
-        }
-
-        contas.hotmart = { conectado: true, email, senha };
-        localStorage.setItem('contas', JSON.stringify(contas));
-        mostrarNotificacao('✅ Hotmart conectado com sucesso');
-    } else if (plataforma === 'kiwify') {
-        const email = document.getElementById('kiwifyEmail').value.trim();
-        const senha = document.getElementById('kiwifySenha').value.trim();
-
-        if (!email || !senha) {
-            mostrarNotificacao('⚠️ Preencha email e senha da conta Kiwify', true);
-            return;
-        }
-
-        contas.kiwify = { conectado: true, email, senha };
-        localStorage.setItem('contas', JSON.stringify(contas));
-        mostrarNotificacao('✅ Kiwify conectado com sucesso');
-    } else if (plataforma === 'monetizze') {
-        const email = document.getElementById('monetizzeEmail').value.trim();
-        const senha = document.getElementById('monetizzeSenha').value.trim();
-
-        if (!email || !senha) {
-            mostrarNotificacao('⚠️ Preencha email e senha da conta Monetizze', true);
-            return;
-        }
-
-        contas.monetizze = { conectado: true, email, senha };
-        localStorage.setItem('contas', JSON.stringify(contas));
-        mostrarNotificacao('✅ Monetizze conectado com sucesso');
-    } else if (plataforma === 'eduzz') {
-        const email = document.getElementById('eduzzEmail').value.trim();
-        const senha = document.getElementById('eduzzSenha').value.trim();
-
-        if (!email || !senha) {
-            mostrarNotificacao('⚠️ Preencha email e senha da conta Eduzz', true);
-            return;
-        }
-
-        contas.eduzz = { conectado: true, email, senha };
-        localStorage.setItem('contas', JSON.stringify(contas));
-        mostrarNotificacao('✅ Eduzz conectado com sucesso');
+    if (!apiKey) {
+        mostrarNotificacao(`⚠️ Preencha a API Key da ${plataforma.charAt(0).toUpperCase() + plataforma.slice(1)}`, true);
+        return;
     }
 
+    contas[plataforma] = { conectado: true, apiKey };
+    localStorage.setItem('contas', JSON.stringify(contas));
     carregarContas();
     atualizarContasStatus();
+    mostrarNotificacao(`✅ API Key da ${plataforma.charAt(0).toUpperCase() + plataforma.slice(1)} salva`);
 }
 
 function carregarContas() {
     const contas = JSON.parse(localStorage.getItem('contas')) || { hotmart: {}, kiwify: {}, monetizze: {}, eduzz: {} };
 
     if (contas.hotmart) {
-        document.getElementById('hotmartEmail').value = contas.hotmart.email || '';
-        document.getElementById('hotmartSenha').value = contas.hotmart.senha || '';
+        document.getElementById('hotmartApiKey').value = contas.hotmart.apiKey || '';
     }
     if (contas.kiwify) {
-        document.getElementById('kiwifyEmail').value = contas.kiwify.email || '';
-        document.getElementById('kiwifySenha').value = contas.kiwify.senha || '';
+        document.getElementById('kiwifyApiKey').value = contas.kiwify.apiKey || '';
     }
     if (contas.monetizze) {
-        document.getElementById('monetizzeEmail').value = contas.monetizze.email || '';
-        document.getElementById('monetizzeSenha').value = contas.monetizze.senha || '';
+        document.getElementById('monetizzeApiKey').value = contas.monetizze.apiKey || '';
     }
     if (contas.eduzz) {
-        document.getElementById('eduzzEmail').value = contas.eduzz.email || '';
-        document.getElementById('eduzzSenha').value = contas.eduzz.senha || '';
+        document.getElementById('eduzzApiKey').value = contas.eduzz.apiKey || '';
     }
 }
 
@@ -781,32 +753,32 @@ function salvarConfiguracaoKiwify() {
 }
 
 function atualizarContasStatus() {
-    const contas = JSON.parse(localStorage.getItem('contas')) || { hotmart: {}, kiwify: {}, kiwifyConfig: {} };
+    const contas = JSON.parse(localStorage.getItem('contas')) || { hotmart: {}, kiwify: {}, monetizze: {}, eduzz: {}, kiwifyConfig: {} };
     const postagens = JSON.parse(localStorage.getItem('postagens')) || [];
     const status = document.getElementById('contasStatus');
 
     let html = '<h3>Status das Contas</h3>';
 
     if (contas.hotmart && contas.hotmart.conectado) {
-        html += `<div class="conta-ativa">✅ Hotmart conectado • ${contas.hotmart.email}</div>`;
+        html += `<div class="conta-ativa">✅ Hotmart conectado • ${maskApiKey(contas.hotmart.apiKey)}</div>`;
     } else {
         html += '<div class="conta-inativa">⚠️ Hotmart não conectado</div>';
     }
 
     if (contas.kiwify && contas.kiwify.conectado) {
-        html += `<div class="conta-ativa">✅ Kiwify conectado • ${contas.kiwify.email}</div>`;
+        html += `<div class="conta-ativa">✅ Kiwify conectado • ${maskApiKey(contas.kiwify.apiKey)}</div>`;
     } else {
         html += '<div class="conta-inativa">⚠️ Kiwify não conectado</div>';
     }
 
     if (contas.monetizze && contas.monetizze.conectado) {
-        html += `<div class="conta-ativa">✅ Monetizze conectado • ${contas.monetizze.email}</div>`;
+        html += `<div class="conta-ativa">✅ Monetizze conectado • ${maskApiKey(contas.monetizze.apiKey)}</div>`;
     } else {
         html += '<div class="conta-inativa">⚠️ Monetizze não conectado</div>';
     }
 
     if (contas.eduzz && contas.eduzz.conectado) {
-        html += `<div class="conta-ativa">✅ Eduzz conectado • ${contas.eduzz.email}</div>`;
+        html += `<div class="conta-ativa">✅ Eduzz conectado • ${maskApiKey(contas.eduzz.apiKey)}</div>`;
     } else {
         html += '<div class="conta-inativa">⚠️ Eduzz não conectado</div>';
     }
