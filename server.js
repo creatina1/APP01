@@ -52,8 +52,11 @@ app.post('/api/anunciar', async (req, res) => {
 
     const sucesso = resultados.some(item => item.success);
     const statusCode = sucesso ? 200 : 400;
+    const mensagem = !sucesso
+        ? resultados.filter(item => !item.success).map(item => `${item.plataforma}: ${item.error}`).join(' | ')
+        : null;
 
-    return res.status(statusCode).json({ success: sucesso, results: resultados });
+    return res.status(statusCode).json({ success: sucesso, results: resultados, message: mensagem });
 });
 
 app.get('/health', (req, res) => {

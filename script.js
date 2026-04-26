@@ -498,8 +498,9 @@ async function anunciarProduto(id) {
 
         const result = await response.json();
         if (!response.ok) {
+            const detail = result.message || extractErrorFromResults(result.results) || 'Falha ao anunciar produto';
             console.error('Erro ao anunciar produto:', result);
-            throw new Error('Falha ao anunciar produto');
+            throw new Error(detail);
         }
 
         const plataformasSucesso = result.results.filter(r => r.success).map(r => r.plataforma);
