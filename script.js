@@ -498,8 +498,9 @@ async function anunciarProduto(id) {
 
         const result = await response.json();
         if (!response.ok) {
-            const detail = result.message || result.error || JSON.stringify(result);
-            throw new Error(detail || 'Erro ao anunciar produto');
+            const detail = result.message || result.error || extractErrorFromResults(result.results) || 'Erro ao anunciar produto';
+            console.error('Erro ao anunciar produto:', result);
+            throw new Error(detail);
         }
 
         const plataformasSucesso = result.results.filter(r => r.success).map(r => r.plataforma);
@@ -526,19 +527,20 @@ async function anunciarProduto(id) {
         localStorage.setItem('postagens', JSON.stringify(postagens));
         atualizarContasStatus();
 
-        // Verificar especificamente Kiwify
         const kiwifyResult = result.results.find(r => r.plataforma === 'Kiwify');
         if (kiwifyResult && kiwifyResult.success) {
             alert('Produto Anunciado com Sucesso!');
         } else if (kiwifyResult) {
             console.error('Erro ao anunciar produto na Kiwify:', kiwifyResult.error);
+            mostrarNotificacao('❌ Falha ao anunciar na Kiwify', true);
         }
 
         if (plataformasFalha.length > 0 && plataformasFalha.some(f => !f.startsWith('Kiwify:'))) {
             mostrarNotificacao(`⚠️ Algumas integrações falharam: ${plataformasFalha.filter(f => !f.startsWith('Kiwify:')).join(' | ')}`, true);
         }
     } catch (error) {
-        mostrarNotificacao(`❌ ${error.message}`, true);
+        console.error('Erro de anúncio:', error);
+        mostrarNotificacao(`❌ ${formatErrorMessage(error.message || error)}`, true);
     }
 }
 
@@ -965,4 +967,28 @@ function mostrarNotificacao(msg, erro = false) {
     setTimeout(() => {
         notif.classList.remove('show');
     }, 3000);
+}
+
+function extractErrorFromResults(results) {
+    if (!Array.isArray(results)) return null;
+    const errors = results
+        .map(r => r.error)
+        .filter(error => error && typeof error === 'string');
+    return errors.length ? errors.join(' | ') : null;
+}
+
+function formatErrorMessage(error) {
+    if (!error) return 'Erro ao anunciar produto';
+    if (typeof error === 'string') {
+        const max = 100;
+        return error.length > max ? `${error.slice(0, max)}...` : error;
+    }
+    if (Array.isArray(error)) {
+        return error.map(formatErrorMessage).join(' | ');
+    }
+    if (typeof error === 'object') {
+        const values = Object.values(error).filter(Boolean);
+        return values.length ? formatErrorMessage(values.join(' | ')) : 'Erro ao anunciar produto';
+    }
+    return String(error);
 }
