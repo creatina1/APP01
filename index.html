@@ -134,6 +134,58 @@
         </div>
     </div>
 
+    <div id="kiwifyProductModal" class="form-modal">
+        <div class="form-modal-content">
+            <div class="modal-header">
+                <h3>Completar informações Kiwify</h3>
+                <button class="btn-close" onclick="fecharKiwifyModal()">✕</button>
+            </div>
+            <div class="form-body">
+                <p>Preencha os dados necessários para criar o produto no Kiwify.</p>
+                <div class="form-row">
+                    <label for="kiwifyProductName">Nome do produto</label>
+                    <input id="kiwifyProductName" type="text" class="input-field" disabled>
+                </div>
+                <div class="form-row">
+                    <label for="kiwifyProductDescription">Descrição</label>
+                    <textarea id="kiwifyProductDescription" class="input-field" rows="4" disabled></textarea>
+                </div>
+                <div class="form-row">
+                    <label for="kiwifyProductPrice">Preço</label>
+                    <input id="kiwifyProductPrice" type="text" class="input-field" disabled>
+                </div>
+                <div class="form-row">
+                    <label for="kiwifyPageUrl">Página de vendas</label>
+                    <input id="kiwifyPageUrl" type="text" class="input-field" placeholder="https://example.com">
+                </div>
+                <div class="form-row">
+                    <label for="kiwifyPaymentType">Tipo de pagamento</label>
+                    <select id="kiwifyPaymentType" class="input-field">
+                        <option value="único">Pagamento único</option>
+                        <option value="recorrente">Assinatura recorrente</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="kiwifyDeliveryType">Entrega do conteúdo</label>
+                    <select id="kiwifyDeliveryType" class="input-field">
+                        <option value="kiwify">Área de membros da Kiwify</option>
+                        <option value="externa">Área de membros externa</option>
+                        <option value="presencial">Evento presencial</option>
+                        <option value="apenas_pagamento">Quero apenas receber pagamentos</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="kiwifyMembershipArea">Área de membros</label>
+                    <input id="kiwifyMembershipArea" type="text" class="input-field" placeholder="Nova área de membros">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="fecharKiwifyModal()">Cancelar</button>
+                <button class="btn-primary" onclick="submitKiwifyForm()">Criar no Kiwify</button>
+            </div>
+        </div>
+    </div>
+
     <div id="notification" class="notification"></div>
 
     <script src="script.js"></script>

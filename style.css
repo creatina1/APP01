@@ -633,6 +633,58 @@ body {
     flex-direction: column;
 }
 
+.form-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 9999;
+}
+
+.form-modal.show {
+    display: flex;
+}
+
+.form-modal-content {
+    width: 100%;
+    max-width: 560px;
+    background: #0f1419;
+    border: 1px solid #2a2a3e;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-row label {
+    color: #c0c0d8;
+    font-size: 0.9rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px;
+    background: #0c1119;
+}
+
 .modal-header {
     display: flex;
     justify-content: space-between;

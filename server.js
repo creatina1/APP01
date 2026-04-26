@@ -10,9 +10,13 @@ app.get('/', (req, res) => {
 });
 
 app.post('/api/anunciar', async (req, res) => {
-    const { produto, contas } = req.body;
+    const { produto, contas, kiwifyOptions } = req.body;
 
-    console.log('POST /api/anunciar body:', { produto, contas: { ...contas, kiwify: { apiKey: contas?.kiwify?.apiKey ? '*****' : '' } } });
+    console.log('POST /api/anunciar body:', {
+        produto,
+        contas: { ...contas, kiwify: { apiKey: contas?.kiwify?.apiKey ? '*****' : '' } },
+        kiwifyOptions
+    });
 
     if (!produto || !contas) {
         return res.status(400).json({ success: false, message: 'Dados inválidos para anúncio' });
@@ -24,7 +28,7 @@ app.post('/api/anunciar', async (req, res) => {
     if (contas.kiwify?.apiKey) {
         tentativaRealizada = true;
         try {
-            const kiwifyResult = await criarProdutoKiwify(produto, contas.kiwify.apiKey);
+            const kiwifyResult = await criarProdutoKiwify(produto, contas.kiwify.apiKey, kiwifyOptions);
             resultados.push({ plataforma: 'Kiwify', success: true, details: kiwifyResult });
         } catch (error) {
             resultados.push({ plataforma: 'Kiwify', success: false, error: error.message });
@@ -63,17 +67,25 @@ app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK', message: 'Servidor funcionando' });
 });
 
-async function criarProdutoKiwify(produto, apiKey) {
+async function criarProdutoKiwify(produto, apiKey, options = {}) {
     // Converter preço para centavos
     const precoEmCentavos = Math.round(Number(String(produto.preco).replace(',', '.')) * 100);
+    const pageUrl = options.pageUrl || 'https://exemplo.com/vendas';
+    const paymentType = options.paymentType || 'único';
+    const deliveryType = options.deliveryType || 'kiwify';
+    const membershipArea = options.membershipArea || 'Nova área de membros';
 
     const kiwifyPayload = {
         name: produto.nome,
-        price: precoEmCentavos,
-        category: 'Internet Marketing',
-        page_url: 'https://exemplo.com/vendas',
+        title: produto.nome,
         description: produto.descricao,
-        currency: 'BRL'
+        price: precoEmCentavos,
+        currency: 'BRL',
+        category: 'Internet Marketing',
+        page_url: pageUrl,
+        payment_type: paymentType,
+        delivery_type: deliveryType,
+        membership_area: membershipArea
     };
 
     console.log('Kiwify payload:', kiwifyPayload);

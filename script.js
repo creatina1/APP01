@@ -4,6 +4,8 @@ let usuarioLogado = null;
 let produtosGerados = [];
 let pdfBlobUrl = null;
 let currentPdfProdutoId = null;
+let anuncioKiwifyProduto = null;
+let anuncioKiwifyContas = null;
 
 window.addEventListener('load', () => {
     iniciarDados();
@@ -489,11 +491,23 @@ async function anunciarProduto(id) {
         produto.accessKey = generateAccessKey(produto.nome, produto.id);
     }
 
+    anuncioKiwifyProduto = produto;
+    anuncioKiwifyContas = contas;
+
+    if (contas.kiwify?.apiKey) {
+        showKiwifyModal();
+        return;
+    }
+
+    await enviarAnuncio(produto, contas, null);
+}
+
+async function enviarAnuncio(produto, contas, kiwifyOptions) {
     try {
         const response = await fetch('/api/anunciar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ produto, contas })
+            body: JSON.stringify({ produto, contas, kiwifyOptions })
         });
 
         const result = await response.json();
@@ -510,9 +524,8 @@ async function anunciarProduto(id) {
         const postagens = JSON.parse(localStorage.getItem('postagens')) || [];
         const dataCriacao = new Date().toLocaleString('pt-BR');
 
-        let postagem = null;
         if (houveSucesso) {
-            postagem = {
+            const postagem = {
                 produtoId: produto.id,
                 nome: produto.nome,
                 descricao: produto.descricao,
@@ -547,6 +560,45 @@ function maskApiKey(apiKey) {
     if (!apiKey) return '';
     if (apiKey.length <= 10) return apiKey;
     return `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}`;
+}
+
+function showKiwifyModal() {
+    if (!anuncioKiwifyProduto) return;
+    document.getElementById('kiwifyProductName').value = anuncioKiwifyProduto.nome;
+    document.getElementById('kiwifyProductDescription').value = anuncioKiwifyProduto.descricao || '';
+    document.getElementById('kiwifyProductPrice').value = `R$ ${anuncioKiwifyProduto.preco}`;
+    document.getElementById('kiwifyPageUrl').value = 'https://exemplo.com';
+    document.getElementById('kiwifyPaymentType').value = 'único';
+    document.getElementById('kiwifyDeliveryType').value = 'kiwify';
+    document.getElementById('kiwifyMembershipArea').value = 'Nova área de membros';
+    document.getElementById('kiwifyProductModal').classList.add('show');
+}
+
+function fecharKiwifyModal() {
+    document.getElementById('kiwifyProductModal').classList.remove('show');
+}
+
+async function submitKiwifyForm() {
+    const pageUrl = document.getElementById('kiwifyPageUrl').value.trim();
+    const paymentType = document.getElementById('kiwifyPaymentType').value;
+    const deliveryType = document.getElementById('kiwifyDeliveryType').value;
+    const membershipArea = document.getElementById('kiwifyMembershipArea').value.trim() || 'Nova área de membros';
+
+    if (!pageUrl) {
+        mostrarNotificacao('⚠️ Preencha a página de vendas', true);
+        return;
+    }
+
+    fecharKiwifyModal();
+
+    const kiwifyOptions = {
+        paymentType,
+        deliveryType,
+        membershipArea,
+        pageUrl
+    };
+
+    await enviarAnuncio(anuncioKiwifyProduto, anuncioKiwifyContas, kiwifyOptions);
 }
 
 function mostrarConteudoDigital(id) {
