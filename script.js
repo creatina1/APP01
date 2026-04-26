@@ -574,9 +574,9 @@ function showKiwifyModal() {
     document.getElementById('kiwifySupportEmail').value = '';
     document.getElementById('kiwifyProducerName').value = '';
     document.getElementById('kiwifyLanguage').value = 'pt-BR';
-    document.getElementById('kiwifyPaymentType').value = 'pix';
+    document.getElementById('kiwifyPaymentType').value = 'one_time';
     document.getElementById('kiwifyProductType').value = 'digital';
-    document.getElementById('kiwifyDeliveryType').value = 'kiwify';
+    document.getElementById('kiwifyDeliveryType').value = 'payment_only';
     document.getElementById('kiwifyMembershipArea').value = '';
     document.getElementById('kiwifyProductModal').classList.add('show');
 }
@@ -587,7 +587,7 @@ function fecharKiwifyModal() {
 
 async function submitKiwifyForm() {
     const pageUrl = document.getElementById('kiwifyPageUrl').value.trim();
-    const paymentType = 'pix';
+    const paymentType = 'one_time';
     const productType = 'digital';
     const deliveryType = document.getElementById('kiwifyDeliveryType').value;
     const membershipArea = document.getElementById('kiwifyMembershipArea').value.trim() || '';
@@ -598,13 +598,8 @@ async function submitKiwifyForm() {
     const language = document.getElementById('kiwifyLanguage').value;
 
     // Validar página de vendas (obrigatória e deve ser HTTPS)
-    if (!pageUrl) {
-        mostrarNotificacao('⚠️ Preencha a página de vendas', true);
-        return;
-    }
-
-    if (!pageUrl.includes('http')) {
-        mostrarNotificacao('⚠️ A URL deve começar com http ou https', true);
+    if (!pageUrl || !pageUrl.startsWith('http')) {
+        mostrarNotificacao('⚠️ Informe uma URL de página de vendas válida (com http ou https)', true);
         return;
     }
 
@@ -617,12 +612,6 @@ async function submitKiwifyForm() {
     // Validar nome do produtor (obrigatório)
     if (!producerName) {
         mostrarNotificacao('⚠️ Preencha o nome do produtor', true);
-        return;
-    }
-
-    // Validar que não há campos vazios que causarão erro 400
-    if (!category) {
-        mostrarNotificacao('⚠️ Selecione uma categoria', true);
         return;
     }
 

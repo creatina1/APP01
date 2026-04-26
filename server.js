@@ -68,24 +68,20 @@ app.get('/health', (req, res) => {
 });
 
 async function criarProdutoKiwify(produto, apiKey, options = {}) {
-    // 1. Corrigir o Preço (transformar em centavos como inteiro)
-    const precoEmCentavos = Math.round(parseFloat(String(produto.preco).replace(',', '.')) * 100);
-    
-    // 2. Validar a URL da Página de Vendas
-    const pageUrl = (options.pageUrl && options.pageUrl.includes('http')) 
-        ? options.pageUrl 
-        : 'https://kiwify.com.br';
-    
-    const deliveryType = options.deliveryType || 'kiwify';
+    const deliveryType = options.deliveryType || 'payment_only';
     const membershipArea = options.membershipArea || '';
     const productType = 'digital';
-    const paymentType = 'pix';
+    const paymentType = 'one_time';
 
-    // 3. Ajustar os Campos Obrigatórios do Payload
+    // Ajuste da URL para evitar erro 400
+    const pageUrl = (options.pageUrl && options.pageUrl.startsWith('http')) 
+        ? options.pageUrl 
+        : 'https://kiwify.com.br';
+
     const kiwifyPayload = {
         name: produto.titulo || produto.nome || 'Produto sem título',
         description: produto.descricao || 'Descrição do infoproduto gerado',
-        price: precoEmCentavos,
+        price: Math.round(parseFloat(String(produto.preco).replace(',', '.')) * 100),
         category: options.category || 'Internet Marketing',
         page_url: pageUrl,
         type: productType,
