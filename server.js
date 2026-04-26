@@ -19,34 +19,35 @@ app.post('/api/anunciar', async (req, res) => {
     }
 
     const resultados = [];
+    let tentativaRealizada = false;
 
     if (contas.kiwify?.apiKey) {
+        tentativaRealizada = true;
         try {
             const kiwifyResult = await criarProdutoKiwify(produto, contas.kiwify.apiKey);
             resultados.push({ plataforma: 'Kiwify', success: true, details: kiwifyResult });
         } catch (error) {
             resultados.push({ plataforma: 'Kiwify', success: false, error: error.message });
         }
-    } else {
-        resultados.push({ plataforma: 'Kiwify', success: false, error: 'API key da Kiwify não configurada' });
     }
 
     if (contas.hotmart?.apiKey) {
+        tentativaRealizada = true;
         resultados.push({ plataforma: 'Hotmart', success: false, error: 'Integração Hotmart não implementada ainda' });
-    } else {
-        resultados.push({ plataforma: 'Hotmart', success: false, error: 'API key da Hotmart não configurada' });
     }
 
     if (contas.monetizze?.apiKey) {
+        tentativaRealizada = true;
         resultados.push({ plataforma: 'Monetizze', success: false, error: 'Integração Monetizze não implementada ainda' });
-    } else {
-        resultados.push({ plataforma: 'Monetizze', success: false, error: 'API key da Monetizze não configurada' });
     }
 
     if (contas.eduzz?.apiKey) {
+        tentativaRealizada = true;
         resultados.push({ plataforma: 'Eduzz', success: false, error: 'Integração Eduzz não implementada ainda' });
-    } else {
-        resultados.push({ plataforma: 'Eduzz', success: false, error: 'API key da Eduzz não configurada' });
+    }
+
+    if (!tentativaRealizada) {
+        return res.status(400).json({ success: false, message: 'Nenhuma plataforma configurada para anúncio' });
     }
 
     const sucesso = resultados.some(item => item.success);
@@ -66,7 +67,8 @@ async function criarProdutoKiwify(produto, apiKey) {
     const kiwifyPayload = {
         name: produto.nome,
         price: precoEmCentavos,
-        category: 'Internet Marketing'
+        category: 'Internet Marketing',
+        page_url: 'https://exemplo.com/vendas'
     };
 
     console.log('Kiwify payload:', kiwifyPayload);

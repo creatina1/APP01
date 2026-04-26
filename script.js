@@ -504,38 +504,37 @@ async function anunciarProduto(id) {
 
         const plataformasSucesso = result.results.filter(r => r.success).map(r => r.plataforma);
         const plataformasFalha = result.results.filter(r => !r.success).map(r => `${r.plataforma}: ${formatErrorMessage(r.error || 'erro desconhecido')}`);
+        const houveSucesso = plataformasSucesso.length > 0;
 
         const postagens = JSON.parse(localStorage.getItem('postagens')) || [];
         const dataCriacao = new Date().toLocaleString('pt-BR');
 
-        const postagem = {
-            produtoId: produto.id,
-            nome: produto.nome,
-            descricao: produto.descricao,
-            preco: produto.preco,
-            plataforma: plataformasSucesso.join(', '),
-            conta: plataformasSucesso.length > 0 ? plataformasSucesso.join(', ') : 'Nenhuma',
-            configuracao: contas.kiwifyConfig || null,
-            data: dataCriacao,
-            accessKey: produto.accessKey,
-            digitalContent: produto.digitalContent || null,
-            resultados: result.results
-        };
+        let postagem = null;
+        if (houveSucesso) {
+            postagem = {
+                produtoId: produto.id,
+                nome: produto.nome,
+                descricao: produto.descricao,
+                preco: produto.preco,
+                plataforma: plataformasSucesso.join(', '),
+                conta: plataformasSucesso.join(', '),
+                configuracao: contas.kiwifyConfig || null,
+                data: dataCriacao,
+                accessKey: produto.accessKey,
+                digitalContent: produto.digitalContent || null,
+                resultados: result.results
+            };
 
-        postagens.push(postagem);
-        localStorage.setItem('postagens', JSON.stringify(postagens));
-        atualizarContasStatus();
-
-        const kiwifyResult = result.results.find(r => r.plataforma === 'Kiwify');
-        if (kiwifyResult && kiwifyResult.success) {
+            postagens.push(postagem);
+            localStorage.setItem('postagens', JSON.stringify(postagens));
+            atualizarContasStatus();
             alert('Produto Anunciado com Sucesso!');
-        } else if (kiwifyResult) {
-            console.error('Erro ao anunciar produto na Kiwify:', kiwifyResult.error);
-            mostrarNotificacao('❌ Não foi possível anunciar na Kiwify', true);
         }
 
-        if (plataformasFalha.length > 0 && plataformasFalha.some(f => !f.startsWith('Kiwify:'))) {
-            mostrarNotificacao(`⚠️ Algumas integrações falharam: ${plataformasFalha.filter(f => !f.startsWith('Kiwify:')).join(' | ')}`, true);
+        if (plataformasFalha.length > 0) {
+            mostrarNotificacao(`⚠️ Algumas plataformas falharam: ${plataformasFalha.join(' | ')}`, true);
+        } else if (!houveSucesso) {
+            mostrarNotificacao('❌ Não foi possível anunciar o produto', true);
         }
     } catch (error) {
         console.error('Erro de anúncio:', error);
