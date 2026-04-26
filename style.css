@@ -651,6 +651,7 @@ body {
 .form-modal-content {
     width: 100%;
     max-width: 560px;
+    max-height: 90vh;
     background: #0f1419;
     border: 1px solid #2a2a3e;
     border-radius: 12px;
@@ -664,6 +665,22 @@ body {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    overflow-y: auto;
+    max-height: calc(90vh - 150px);
+    padding-right: 10px;
+}
+
+.form-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.form-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+}
+
+.form-body::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 .form-row {
