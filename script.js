@@ -498,7 +498,7 @@ async function anunciarProduto(id) {
 
         const result = await response.json();
         if (!response.ok) {
-            const detail = result.message || extractErrorFromResults(result.results) || 'Falha ao anunciar produto';
+            const detail = obterMensagemErro(result) || 'Falha ao anunciar produto';
             console.error('Erro ao anunciar produto:', result);
             throw new Error(detail);
         }
@@ -993,6 +993,39 @@ function formatErrorMessage(error) {
         return values.length ? formatErrorMessage(values.join(' | ')) : 'Falha ao anunciar produto';
     }
     return String(error);
+}
+
+function obterMensagemErro(result) {
+    if (!result) return null;
+    if (typeof result.message === 'string' && result.message.trim()) return result.message;
+    const details = extractErrorFromResults(result.results);
+    if (details) return details;
+    if (result.results && Array.isArray(result.results) && result.results.length > 0) {
+        const firstError = result.results[0].error;
+        if (typeof firstError === 'string' && firstError.trim()) return firstError;
+    }
+    return null;
+}
+
+function traduzirMensagemErro(texto) {
+    if (!texto || typeof texto !== 'string') return null;
+    const mensagem = texto.toUpperCase();
+    const mapa = {
+        'TOKEN_INVALID': 'Token inválido',
+        'INVALID_TOKEN': 'Token inválido',
+        'TOKEN_EXPIRED': 'Token expirado',
+        'API_KEY_INVALID': 'Chave de API inválida',
+        'API_KEY_REQUIRED': 'Chave de API obrigatória',
+        'INVALID_REQUEST': 'Requisição inválida',
+        'UNAUTHORIZED': 'Não autorizado',
+        'NOT_FOUND': 'Não encontrado',
+        'METHOD_NOT_ALLOWED': 'Método não permitido',
+        'ACCESS_DENIED': 'Acesso negado'
+    };
+    for (const chave in mapa) {
+        if (mensagem.includes(chave)) return mapa[chave];
+    }
+    return null;
 }
 
 function traduzirMensagemErro(texto) {

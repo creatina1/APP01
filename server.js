@@ -65,13 +65,15 @@ app.get('/health', (req, res) => {
 
 async function criarProdutoKiwify(produto, apiKey) {
     // Converter preço para centavos
-    const precoEmCentavos = Math.round(Number(produto.preco.replace(',', '.')) * 100);
+    const precoEmCentavos = Math.round(Number(String(produto.preco).replace(',', '.')) * 100);
 
     const kiwifyPayload = {
         name: produto.nome,
         price: precoEmCentavos,
         category: 'Internet Marketing',
-        page_url: 'https://exemplo.com/vendas'
+        page_url: 'https://exemplo.com/vendas',
+        description: produto.descricao,
+        currency: 'BRL'
     };
 
     console.log('Kiwify payload:', kiwifyPayload);
@@ -90,7 +92,8 @@ async function criarProdutoKiwify(produto, apiKey) {
 
     if (!response.ok) {
         console.error('Kiwify error response:', data);
-        throw new Error(data.message || JSON.stringify(data) || 'Falha ao criar produto na Kiwify');
+        const detalhe = data.message || data.error || (data.errors && data.errors[0] && data.errors[0].message) || JSON.stringify(data);
+        throw new Error(detalhe || 'Falha ao criar produto na Kiwify');
     }
 
     return data;
