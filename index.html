@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Infoprodutos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-box">
+                <h1>🚀 Gestão de Infoprodutos</h1>
+                <input type="email" id="emailInput" placeholder="Email" class="input-field">
+                <input type="password" id="passwordInput" placeholder="Senha" class="input-field">
+                <button onclick="login()" class="btn-login">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="appScreen" class="app-screen" style="display:none;">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>📊 Dashboard</h2>
+                <button onclick="logout()" class="btn-logout">Sair</button>
+            </div>
+            <nav class="nav-menu">
+                <button onclick="switchTab('fabrica')" class="nav-btn active" data-tab="fabrica">🏭 Fábrica</button>
+                <button onclick="switchTab('historico')" class="nav-btn" data-tab="historico">📜 Histórico</button>
+                <button onclick="switchTab('gestao-contas')" class="nav-btn" data-tab="gestao-contas">💳 Contas</button>
+                <button id="acessoAdmBtn" onclick="switchTab('acesso-adm')" class="nav-btn" data-tab="acesso-adm" style="display:none;">👤 Acesso ADM</button>
+            </nav>
+            <div class="sidebar-footer">
+                <p id="userDisplay">Usuário</p>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <section id="fabrica" class="tab-content active">
+                <div class="header-section">
+                    <h2>🏭 Fábrica de Infoprodutos</h2>
+                    <button onclick="gerarProdutos()" class="btn-primary">⚡ Gerar 5 Produtos</button>
+                </div>
+                <div id="produtosGrid" class="produtos-grid"></div>
+            </section>
+
+            <section id="historico" class="tab-content">
+                <div class="header-section">
+                    <h2>📜 Histórico de Infoprodutos</h2>
+                    <button onclick="limparHistorico()" class="btn-danger">🗑️ Limpar Tudo</button>
+                </div>
+                <div id="historicoList" class="historico-list"></div>
+            </section>
+
+            <section id="gestao-contas" class="tab-content">
+                <div class="header-section">
+                    <h2>💳 Gestão de Contas</h2>
+                </div>
+                <p style="margin-bottom: 20px; color: #b0b0b0;">Coloque o email e a senha de cada plataforma para realizar o login e permitir que o produto seja anunciado automaticamente.</p>
+                <div class="contas-container">
+                    <div class="conta-card">
+                        <h3>Hotmart</h3>
+                        <input type="text" id="hotmartEmail" placeholder="Email da conta Hotmart" class="input-field">
+                        <input type="password" id="hotmartSenha" placeholder="Senha da conta Hotmart" class="input-field">
+                        <button onclick="salvarConta('hotmart')" class="btn-primary">Conectar Hotmart</button>
+                    </div>
+                    <div class="conta-card">
+                        <h3>Kiwify</h3>
+                        <input type="text" id="kiwifyEmail" placeholder="Email da conta Kiwify" class="input-field">
+                        <input type="password" id="kiwifySenha" placeholder="Senha da conta Kiwify" class="input-field">
+                        <button onclick="salvarConta('kiwify')" class="btn-primary">Conectar Kiwify</button>
+                    </div>
+                    <div class="conta-card">
+                        <h3>Monetizze</h3>
+                        <input type="text" id="monetizzeEmail" placeholder="Email da conta Monetizze" class="input-field">
+                        <input type="password" id="monetizzeSenha" placeholder="Senha da conta Monetizze" class="input-field">
+                        <button onclick="salvarConta('monetizze')" class="btn-primary">Conectar Monetizze</button>
+                    </div>
+                    <div class="conta-card">
+                        <h3>Eduzz</h3>
+                        <input type="text" id="eduzzEmail" placeholder="Email da conta Eduzz" class="input-field">
+                        <input type="password" id="eduzzSenha" placeholder="Senha da conta Eduzz" class="input-field">
+                        <button onclick="salvarConta('eduzz')" class="btn-primary">Conectar Eduzz</button>
+                    </div>
+                </div>
+                <div id="contasStatus" class="contas-status"></div>
+            </section>
+
+            <section id="conteudo-digital" class="tab-content">
+                <div class="header-section">
+                    <h2>📚 Conteúdo Digital</h2>
+                </div>
+                <div id="digitalAccess" class="digital-access"></div>
+                <div id="digitalContentContainer" class="digital-content-container"></div>
+            </section>
+
+            <section id="acesso-adm" class="tab-content">
+                <div class="header-section">
+                    <h2>👤 Liberação de Acesso</h2>
+                </div>
+                <div class="adm-container">
+                    <div class="form-section">
+                        <h3>Adicionar Usuário</h3>
+                        <input type="email" id="novoEmailInput" placeholder="Email do usuário" class="input-field">
+                        <input type="password" id="novaSenhaInput" placeholder="Senha do usuário" class="input-field">
+                        <input type="number" id="novoLimiteProdutos" placeholder="Limite de produtos" class="input-field" value="100">
+                        <button onclick="adicionarUsuario()" class="btn-primary">➕ Adicionar</button>
+                    </div>
+                    <div class="form-section">
+                        <h3>Minha senha</h3>
+                        <input type="password" id="senhaAtualInput" placeholder="Senha atual" class="input-field">
+                        <input type="password" id="novaSenhaUsuarioInput" placeholder="Nova senha" class="input-field">
+                        <button onclick="trocarSenhaAtual()" class="btn-primary">🔒 Trocar minha senha</button>
+                    </div>
+                    <div class="usuarios-section">
+                        <h3>Usuários Autorizados</h3>
+                        <div id="usuariosListaAdm" class="usuarios-lista"></div>
+                    </div>
+                    <div class="form-section" id="adminChangeSection" style="display:none;">
+                        <h3>Trocar senha de usuário</h3>
+                        <input type="email" id="emailTrocaSenhaAdm" placeholder="Email do usuário" class="input-field">
+                        <input type="password" id="senhaTrocaAdm" placeholder="Nova senha do usuário" class="input-field">
+                        <button onclick="trocarSenhaUsuario()" class="btn-primary">✏️ Atualizar senha</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="pdfModal" class="pdf-modal">
+        <div class="pdf-modal-content">
+            <div class="modal-header">
+                <h3>Visualizador de PDF do Infoproduto</h3>
+                <button class="btn-close" onclick="fecharPdf()">✕</button>
+            </div>
+            <iframe id="pdfViewer" class="pdf-viewer" title="PDF do Infoproduto"></iframe>
+            <button id="btnAbrirConteudoDigital" class="btn-primary" style="display:none; margin: 16px auto 0;" onclick="abrirConteudoDigital()">📚 Ver conteúdo digital do curso</button>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
