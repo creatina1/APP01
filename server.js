@@ -68,32 +68,37 @@ app.get('/health', (req, res) => {
 });
 
 async function criarProdutoKiwify(produto, apiKey, options = {}) {
-    // Converter preço para centavos
-    const precoEmCentavos = Math.round(Number(String(produto.preco).replace(',', '.')) * 100);
-    const pageUrl = options.pageUrl || 'https://exemplo.com/vendas';
-    const paymentType = 'pix';
-    const productType = options.productType || 'digital';
+    // 1. Corrigir o Preço (transformar em centavos como inteiro)
+    const precoEmCentavos = Math.round(parseFloat(String(produto.preco).replace(',', '.')) * 100);
+    
+    // 2. Validar a URL da Página de Vendas
+    const pageUrl = (options.pageUrl && options.pageUrl.includes('http')) 
+        ? options.pageUrl 
+        : 'https://kiwify.com.br';
+    
     const deliveryType = options.deliveryType || 'kiwify';
-    const membershipArea = options.membershipArea || 'Nova área de membros';
+    const membershipArea = options.membershipArea || '';
+    const productType = 'digital';
+    const paymentType = 'pix';
 
+    // 3. Ajustar os Campos Obrigatórios do Payload
     const kiwifyPayload = {
-        name: produto.nome,
-        title: produto.nome,
-        description: produto.descricao,
+        name: produto.titulo || produto.nome || 'Produto sem título',
+        description: produto.descricao || 'Descrição do infoproduto gerado',
         price: precoEmCentavos,
-        currency: 'BRL',
         category: options.category || 'Internet Marketing',
         page_url: pageUrl,
         type: productType,
         product_type: productType,
-        payment_type: paymentType,
-        payment_method: paymentType,
+        payment_mode: paymentType,
         delivery_type: deliveryType,
-        membership_area: membershipArea,
+        membership_area: membershipArea || '',
         support_email: options.supportEmail || '',
         producer_name: options.producerName || '',
-        language: options.language || 'pt-BR'
+        language: options.language || 'pt-BR',
+        currency: 'BRL'
     };
+
     if (options.imageUrl) {
         kiwifyPayload.image_url = options.imageUrl;
     }

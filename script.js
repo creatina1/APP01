@@ -570,14 +570,14 @@ function showKiwifyModal() {
     document.getElementById('kiwifyProductCategory').value = 'Internet Marketing';
     document.getElementById('kiwifyImageUrl').value = '';
     document.getElementById('kiwifyProductPrice').value = `R$ ${anuncioKiwifyProduto.preco}`;
-    document.getElementById('kiwifyPageUrl').value = 'https://exemplo.com';
+    document.getElementById('kiwifyPageUrl').value = 'https://kiwify.com.br';
     document.getElementById('kiwifySupportEmail').value = '';
     document.getElementById('kiwifyProducerName').value = '';
     document.getElementById('kiwifyLanguage').value = 'pt-BR';
     document.getElementById('kiwifyPaymentType').value = 'pix';
     document.getElementById('kiwifyProductType').value = 'digital';
     document.getElementById('kiwifyDeliveryType').value = 'kiwify';
-    document.getElementById('kiwifyMembershipArea').value = 'Nova área de membros';
+    document.getElementById('kiwifyMembershipArea').value = '';
     document.getElementById('kiwifyProductModal').classList.add('show');
 }
 
@@ -590,25 +590,39 @@ async function submitKiwifyForm() {
     const paymentType = 'pix';
     const productType = 'digital';
     const deliveryType = document.getElementById('kiwifyDeliveryType').value;
-    const membershipArea = document.getElementById('kiwifyMembershipArea').value.trim() || 'Nova área de membros';
+    const membershipArea = document.getElementById('kiwifyMembershipArea').value.trim() || '';
     const category = document.getElementById('kiwifyProductCategory').value;
     const imageUrl = document.getElementById('kiwifyImageUrl').value.trim();
     const supportEmail = document.getElementById('kiwifySupportEmail').value.trim();
     const producerName = document.getElementById('kiwifyProducerName').value.trim();
     const language = document.getElementById('kiwifyLanguage').value;
 
+    // Validar página de vendas (obrigatória e deve ser HTTPS)
     if (!pageUrl) {
         mostrarNotificacao('⚠️ Preencha a página de vendas', true);
         return;
     }
 
+    if (!pageUrl.includes('http')) {
+        mostrarNotificacao('⚠️ A URL deve começar com http ou https', true);
+        return;
+    }
+
+    // Validar e-mail (obrigatório)
     if (!supportEmail) {
         mostrarNotificacao('⚠️ Preencha o e-mail de suporte', true);
         return;
     }
 
+    // Validar nome do produtor (obrigatório)
     if (!producerName) {
         mostrarNotificacao('⚠️ Preencha o nome do produtor', true);
+        return;
+    }
+
+    // Validar que não há campos vazios que causarão erro 400
+    if (!category) {
+        mostrarNotificacao('⚠️ Selecione uma categoria', true);
         return;
     }
 
