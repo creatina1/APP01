@@ -59,6 +59,7 @@ app.get('/health', (req, res) => {
 
 async function criarProdutoKiwify(produto, apiKey) {
     const kiwifyPayload = {
+        name: produto.nome,
         title: produto.nome,
         description: produto.descricao,
         price: Number(produto.preco),
@@ -68,6 +69,9 @@ async function criarProdutoKiwify(produto, apiKey) {
             source: 'APP01'
         }
     };
+
+    console.log('Kiwify payload:', kiwifyPayload);
+    console.log('Kiwify API key presente:', !!apiKey);
 
     const response = await fetch('https://api.kiwify.com.br/v1/products', {
         method: 'POST',
@@ -81,7 +85,8 @@ async function criarProdutoKiwify(produto, apiKey) {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || 'Falha ao criar produto na Kiwify');
+        console.error('Kiwify error response:', data);
+        throw new Error(data.message || JSON.stringify(data) || 'Falha ao criar produto na Kiwify');
     }
 
     return data;
